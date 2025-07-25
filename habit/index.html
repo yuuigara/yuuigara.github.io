@@ -195,11 +195,15 @@
             </div>
             <div class="habit-item">
                 <input type="checkbox" id="habit2" class="habit-checkbox">
-                <label for="habit2" class="habit-label">運動する</label>
+                <label for="habit2" class="habit-label">食後に運動する</label>
             </div>
             <div class="habit-item">
                 <input type="checkbox" id="habit3" class="habit-checkbox">
                 <label for="habit3" class="habit-label">歯磨きする</label>
+            </div>
+            <div class="habit-item">
+                <input type="checkbox" id="habit4" class="habit-checkbox">
+                <label for="habit4" class="habit-label">朝食前にヨーグルトを食べる</label>
             </div>
             <button class="save-button" onclick="saveHabits()">記録を保存</button>
             <div class="message" id="message">記録しました</div>
@@ -214,6 +218,7 @@
                         <th>ストレッチ</th>
                         <th>運動</th>
                         <th>歯磨き</th>
+                        <th>ヨーグルト</th>
                     </tr>
                 </thead>
                 <tbody id="historyTableBody">
@@ -247,7 +252,8 @@
             const data = {
                 habit1: document.getElementById('habit1').checked,
                 habit2: document.getElementById('habit2').checked,
-                habit3: document.getElementById('habit3').checked
+                habit3: document.getElementById('habit3').checked,
+                habit4: document.getElementById('habit4').checked
             };
 
             // 既存のデータを取得
@@ -278,6 +284,7 @@
                 document.getElementById('habit1').checked = todayData.habit1;
                 document.getElementById('habit2').checked = todayData.habit2;
                 document.getElementById('habit3').checked = todayData.habit3;
+                document.getElementById('habit4').checked = todayData.habit4 || false;
             }
         }
 
@@ -303,6 +310,7 @@
                     <td>${data?.habit1 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
                     <td>${data?.habit2 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
                     <td>${data?.habit3 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
+                    <td>${data?.habit4 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
                 `;
 
                 tbody.appendChild(tr);
