@@ -307,10 +307,10 @@
 
                 tr.innerHTML = `
                     <td>${dateString}</td>
-                    <td>${data?.habit1 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
-                    <td>${data?.habit2 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
-                    <td>${data?.habit3 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
-                    <td>${data?.habit4 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>'}</td>
+                    <td>${data ? (data.habit1 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
+                    <td>${data ? (data.habit2 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
+                    <td>${data ? (data.habit3 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
+                    <td>${data ? (data.habit4 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
                 `;
 
                 tbody.appendChild(tr);
