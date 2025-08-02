@@ -333,7 +333,7 @@
         </div>
 
         <div class="history-section">
-            <h2>過去7日間の記録</h2>
+            <h2>過去21日間の記録</h2>
             <table class="history-table">
             </table>
         </div>
@@ -535,8 +535,8 @@
             let bodyHtml = '<tbody>';
             const allData = JSON.parse(localStorage.getItem('habitData') || '{}');
 
-            // 過去7日分の日付を生成
-            for (let i = 0; i < 7; i++) {
+            // 過去21日分の日付を生成
+            for (let i = 0; i < 21; i++) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
                 const dateKey = getDateKey(date);
