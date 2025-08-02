@@ -153,6 +153,131 @@
             font-weight: bold;
         }
 
+        .add-habit-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 15px;
+        }
+
+        .add-habit-button:hover {
+            background-color: #bdc3c7;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .habit-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .form-button.save {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .form-button.save:hover {
+            background-color: #2980b9;
+        }
+
+        .form-button.cancel {
+            background-color: #ecf0f1;
+            color: #333;
+        }
+
+        .form-button.cancel:hover {
+            background-color: #bdc3c7;
+        }
+
+        .habit-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-button {
+            padding: 5px 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .edit-button {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .edit-button:hover {
+            background-color: #e67e22;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
         @media (max-width: 480px) {
             body {
                 padding: 10px;
@@ -189,45 +314,56 @@
         </div>
 
         <div class="habits-section">
-            <div class="habit-item">
-                <input type="checkbox" id="habit1" class="habit-checkbox">
-                <label for="habit1" class="habit-label">ストレッチする</label>
-            </div>
-            <div class="habit-item">
-                <input type="checkbox" id="habit2" class="habit-checkbox">
-                <label for="habit2" class="habit-label">食後に運動する</label>
-            </div>
-            <div class="habit-item">
-                <input type="checkbox" id="habit3" class="habit-checkbox">
-                <label for="habit3" class="habit-label">歯磨きする</label>
-            </div>
-            <div class="habit-item">
-                <input type="checkbox" id="habit4" class="habit-checkbox">
-                <label for="habit4" class="habit-label">朝食前にヨーグルトを食べる</label>
-            </div>
+            <div id="habitsList"></div>
+            <button class="add-habit-button" onclick="showAddHabitForm()">+ 新しい習慣を追加</button>
             <button class="save-button" onclick="saveHabits()">記録を保存</button>
             <div class="message" id="message">記録しました</div>
+        </div>
+
+        <div id="habitFormModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeHabitForm()">&times;</span>
+                <h3 id="formTitle">新しい習慣を追加</h3>
+                <input type="text" id="habitNameInput" placeholder="習慣名を入力" class="habit-input">
+                <div class="form-buttons">
+                    <button onclick="saveHabitDefinition()" class="form-button save">保存</button>
+                    <button onclick="closeHabitForm()" class="form-button cancel">キャンセル</button>
+                </div>
+            </div>
         </div>
 
         <div class="history-section">
             <h2>過去7日間の記録</h2>
             <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>日付</th>
-                        <th>ストレッチ</th>
-                        <th>運動</th>
-                        <th>歯磨き</th>
-                        <th>ヨーグルト</th>
-                    </tr>
-                </thead>
-                <tbody id="historyTableBody">
-                </tbody>
             </table>
         </div>
     </div>
 
     <script>
+        // 習慣の定義を管理
+        let habitDefinitions = [];
+        let editingHabitId = null;
+
+        // デフォルトの習慣
+        const defaultHabits = [
+            { id: 'habit1', name: 'ストレッチする' },
+            { id: 'habit2', name: '食後に運動する' },
+            { id: 'habit3', name: '歯磨きする' },
+            { id: 'habit4', name: '朝食前にヨーグルトを食べる' }
+        ];
+
+        // 習慣の定義を初期化
+        function initializeHabitDefinitions() {
+            const saved = localStorage.getItem('habitDefinitions');
+            if (saved) {
+                habitDefinitions = JSON.parse(saved);
+            } else {
+                // 初回起動時はデフォルトの習慣を設定
+                habitDefinitions = defaultHabits;
+                localStorage.setItem('habitDefinitions', JSON.stringify(habitDefinitions));
+            }
+        }
+
         // 日付を表示
         function displayDate() {
             const today = new Date();
@@ -246,15 +382,38 @@
             return `${year}-${month}-${day}`;
         }
 
+        // 習慣リストを表示
+        function displayHabits() {
+            const habitsList = document.getElementById('habitsList');
+            habitsList.innerHTML = '';
+
+            habitDefinitions.forEach(habit => {
+                const habitItem = document.createElement('div');
+                habitItem.className = 'habit-item';
+                habitItem.innerHTML = `
+                    <input type="checkbox" id="${habit.id}" class="habit-checkbox">
+                    <label for="${habit.id}" class="habit-label">${habit.name}</label>
+                    <div class="habit-actions">
+                        <button class="action-button edit-button" onclick="editHabit('${habit.id}')">編集</button>
+                        <button class="action-button delete-button" onclick="deleteHabit('${habit.id}')">削除</button>
+                    </div>
+                `;
+                habitsList.appendChild(habitItem);
+            });
+        }
+
         // データを保存
         function saveHabits() {
             const todayKey = getDateKey();
-            const data = {
-                habit1: document.getElementById('habit1').checked,
-                habit2: document.getElementById('habit2').checked,
-                habit3: document.getElementById('habit3').checked,
-                habit4: document.getElementById('habit4').checked
-            };
+            const data = {};
+
+            // すべての習慣のチェック状態を保存
+            habitDefinitions.forEach(habit => {
+                const checkbox = document.getElementById(habit.id);
+                if (checkbox) {
+                    data[habit.id] = checkbox.checked;
+                }
+            });
 
             // 既存のデータを取得
             const allData = JSON.parse(localStorage.getItem('habitData') || '{}');
@@ -281,18 +440,99 @@
             const todayData = allData[todayKey];
 
             if (todayData) {
-                document.getElementById('habit1').checked = todayData.habit1;
-                document.getElementById('habit2').checked = todayData.habit2;
-                document.getElementById('habit3').checked = todayData.habit3;
-                document.getElementById('habit4').checked = todayData.habit4 || false;
+                habitDefinitions.forEach(habit => {
+                    const checkbox = document.getElementById(habit.id);
+                    if (checkbox) {
+                        checkbox.checked = todayData[habit.id] || false;
+                    }
+                });
+            }
+        }
+
+        // 新しい習慣フォームを表示
+        function showAddHabitForm() {
+            editingHabitId = null;
+            document.getElementById('formTitle').textContent = '新しい習慣を追加';
+            document.getElementById('habitNameInput').value = '';
+            document.getElementById('habitFormModal').style.display = 'block';
+        }
+
+        // 習慣を編集
+        function editHabit(habitId) {
+            const habit = habitDefinitions.find(h => h.id === habitId);
+            if (habit) {
+                editingHabitId = habitId;
+                document.getElementById('formTitle').textContent = '習慣を編集';
+                document.getElementById('habitNameInput').value = habit.name;
+                document.getElementById('habitFormModal').style.display = 'block';
+            }
+        }
+
+        // フォームを閉じる
+        function closeHabitForm() {
+            document.getElementById('habitFormModal').style.display = 'none';
+            editingHabitId = null;
+        }
+
+        // 習慣の定義を保存
+        function saveHabitDefinition() {
+            const habitName = document.getElementById('habitNameInput').value.trim();
+            if (!habitName) {
+                alert('習慣名を入力してください');
+                return;
+            }
+
+            if (editingHabitId) {
+                // 編集モード
+                const habitIndex = habitDefinitions.findIndex(h => h.id === editingHabitId);
+                if (habitIndex !== -1) {
+                    habitDefinitions[habitIndex].name = habitName;
+                }
+            } else {
+                // 新規追加モード
+                const newHabit = {
+                    id: 'habit' + Date.now(),
+                    name: habitName
+                };
+                habitDefinitions.push(newHabit);
+            }
+
+            // 保存
+            localStorage.setItem('habitDefinitions', JSON.stringify(habitDefinitions));
+
+            // UI更新
+            displayHabits();
+            loadTodayData();
+            displayHistory();
+            closeHabitForm();
+        }
+
+        // 習慣を削除
+        function deleteHabit(habitId) {
+            if (confirm('この習慣を削除してもよろしいですか？')) {
+                habitDefinitions = habitDefinitions.filter(h => h.id !== habitId);
+                localStorage.setItem('habitDefinitions', JSON.stringify(habitDefinitions));
+
+                // UI更新
+                displayHabits();
+                loadTodayData();
+                displayHistory();
             }
         }
 
         // 履歴を表示
         function displayHistory() {
-            const tbody = document.getElementById('historyTableBody');
-            tbody.innerHTML = '';
-
+            const table = document.querySelector('.history-table');
+            
+            // テーブルヘッダーを再構築
+            let headerHtml = '<thead><tr><th>日付</th>';
+            habitDefinitions.forEach(habit => {
+                headerHtml += `<th>${habit.name}</th>`;
+            });
+            headerHtml += '</tr></thead>';
+            
+            // テーブルボディを構築
+            let bodyHtml = '<tbody>';
             const allData = JSON.parse(localStorage.getItem('habitData') || '{}');
 
             // 過去7日分の日付を生成
@@ -301,25 +541,33 @@
                 date.setDate(date.getDate() - i);
                 const dateKey = getDateKey(date);
                 const dateString = `${date.getMonth() + 1}/${date.getDate()}`;
-
-                const tr = document.createElement('tr');
                 const data = allData[dateKey];
 
-                tr.innerHTML = `
-                    <td>${dateString}</td>
-                    <td>${data ? (data.habit1 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
-                    <td>${data ? (data.habit2 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
-                    <td>${data ? (data.habit3 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
-                    <td>${data ? (data.habit4 ? '<span class="check-mark">✓</span>' : '<span class="cross-mark">✗</span>') : '<span style="color: #bdc3c7;">-</span>'}</td>
-                `;
-
-                tbody.appendChild(tr);
+                bodyHtml += `<tr><td>${dateString}</td>`;
+                
+                habitDefinitions.forEach(habit => {
+                    if (data && data[habit.id] !== undefined) {
+                        bodyHtml += data[habit.id] 
+                            ? '<td><span class="check-mark">✓</span></td>' 
+                            : '<td><span class="cross-mark">✗</span></td>';
+                    } else {
+                        bodyHtml += '<td><span style="color: #bdc3c7;">-</span></td>';
+                    }
+                });
+                
+                bodyHtml += '</tr>';
             }
+            bodyHtml += '</tbody>';
+
+            // テーブル全体を更新
+            table.innerHTML = headerHtml + bodyHtml;
         }
 
         // 初期化
         window.onload = function() {
+            initializeHabitDefinitions();
             displayDate();
+            displayHabits();
             loadTodayData();
             displayHistory();
         };
